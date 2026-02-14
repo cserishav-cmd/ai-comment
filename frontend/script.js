@@ -630,4 +630,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch usage stats on page load
     fetchUsageStats();
     loadFavorites(); // Load favorites on startup
+
+    // Usage Badge Toggle (Tap System)
+    const usageBadge = document.getElementById('usageBadge');
+    if (usageBadge) {
+        usageBadge.addEventListener('click', () => {
+            usageBadge.classList.toggle('active');
+        });
+    }
 });

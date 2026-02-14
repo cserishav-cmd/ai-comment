@@ -42,3 +42,5 @@ abThumbs.db
 config.py
 secrets.json
 google_api_key.json
+
+usage_data.json

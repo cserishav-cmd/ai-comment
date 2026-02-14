@@ -42,12 +42,17 @@ def generate_comment():
     context = data.get('context', '')
     response_data = generate_comment_gemini(mood, language, context)
     
+    # Fallback if Gemini fails (e.g. Quota Exceeded)
+    if not response_data:
+        print("Gemini API failed. Using fallback service.")
+        response_data = get_fallback_comment(mood, language, context)
+    
     if response_data and isinstance(response_data, dict):
         return jsonify({
             "comment": response_data.get("comment"),
             "mood": response_data.get("mood"),
             "style": response_data.get("style"),
-            "source": "AI"
+            "source": response_data.get("source", "AI")
         })
     elif response_data:
          return jsonify({"comment": response_data, "source": "AI", "mood": mood, "style": "General"})

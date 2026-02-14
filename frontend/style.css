@@ -876,29 +876,7 @@ footer {
     font-size: 0.78rem;
 }
 
-/* Tooltip Popup */
-.usage-tooltip {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    width: 240px;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-5px);
-    transition: all 0.25s ease;
-    z-index: 100;
-}
 
-.usage-badge:hover .usage-tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
 
 .usage-tooltip-title {
     font-size: 0.85rem;
@@ -967,4 +945,49 @@ footer {
     .header {
         flex-wrap: wrap;
     }
+}
+
+/* Usage Tooltip */
+.usage-info {
+    position: relative;
+    cursor: help;
+}
+
+.usage-tooltip {
+    visibility: hidden;
+    background-color: #222;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1000;
+    top: 100%;
+    /* Below the badge */
+    margin-top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Arrow for tooltip */
+.usage-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent #222 transparent;
+}
+
+.usage-info:hover .usage-tooltip,
+.usage-info.active .usage-tooltip {
+    visibility: visible;
+    opacity: 1;
 }

@@ -95,12 +95,25 @@ def get_fallback_comment(mood, language, context=None):
                             best_comment = COMMENTS_DATA[idx]['text']
                             
             if best_comment:
-                return best_comment
+                return {
+                    "comment": best_comment,
+                    "mood": mood,
+                    "style": "Semantic Match",
+                    "source": "Fallback"
+                }
                 
         except Exception as e:
             print(f"Semantic search failed: {e}")
             # Fallback to random
             
     # 3. Random Selection (Default Fallback)
-    selected = random.choice(filtered_comments)
-    return selected['text']
+    if filtered_comments:
+        selected = random.choice(filtered_comments)
+        return {
+            "comment": selected['text'],
+            "mood": mood,
+            "style": selected.get('style', 'Random Fallback'),
+            "source": "Fallback"
+        }
+    
+    return None

@@ -9,24 +9,62 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 client = None
 
 if API_KEY:
+    print(f"DEBUG: Loaded Gemini API Key starting with: {API_KEY[:5]}...")
     client = genai.Client(api_key=API_KEY)
+else:
+    print("DEBUG: No Gemini API Key found in environment variables.")
 
-MODEL_NAME = "gemini-2.0-flash"  # Verified model name
+MODEL_NAME = "gemini-2.5-flash-lite"
 
 # Generation Config
-# Config is now passed per request or used to create a cached content, 
-# but here we will define the parameters to pass to the call.
 generate_config = types.GenerateContentConfig(
     temperature=1.0,
     top_p=0.95,
     top_k=64,
-    max_output_tokens=500,
+    max_output_tokens=2000, # Increased for batch output
 )
+
+import json
 
 # Daily Query Tracking
 DAILY_LIMIT = 500
+USAGE_FILE = 'usage_data.json'
+
+# Initialize globals
 query_count = 0
 query_date = date.today()
+
+def _save_usage():
+    """Save current usage data to file."""
+    try:
+        data = {
+            "date": query_date.isoformat(),
+            "count": query_count
+        }
+        with open(USAGE_FILE, 'w') as f:
+            json.dump(data, f)
+    except Exception as e:
+        print(f"Error saving usage data: {e}")
+
+def _load_usage():
+    """Load usage data from file."""
+    global query_count, query_date
+    if os.path.exists(USAGE_FILE):
+        try:
+            with open(USAGE_FILE, 'r') as f:
+                data = json.load(f)
+                saved_date = date.fromisoformat(data.get("date", date.today().isoformat()))
+                query_count = data.get("count", 0)
+                query_date = saved_date
+        except Exception as e:
+            print(f"Error loading usage data: {e}")
+
+# Load on module import
+_load_usage()
+
+# In-Memory Cache for Batch Generation
+# Format: {(mood, language, context): [list_of_comments]}
+COMMENT_CACHE = {}
 
 def _reset_if_new_day():
     """Reset counter if it's a new day."""
@@ -35,6 +73,7 @@ def _reset_if_new_day():
     if today != query_date:
         query_count = 0
         query_date = today
+        _save_usage() # Save the reset state
 
 def get_usage_stats():
     """Get current API usage statistics."""
@@ -47,18 +86,36 @@ def get_usage_stats():
     }
 
 # System instruction to set the AI persona
-SYSTEM_INSTRUCTION = """You are a music lover who writes engaging, personal, and heartfelt comments on songs, music videos, and artist pages on platforms like Starmaker.
+SYSTEM_INSTRUCTION = """You are a music lover who writes engaging, personal, and heartfelt comments on songs, music videos, and artist pages.
 
-Your comments are ALWAYS:
+Your task is to generate 5 DIFFERENT, UNIQUE comments based on the user's request.
+
+Each comment must be:
 - About music, songs, artists, melodies, lyrics, or the listening experience
 - 2-3 complete sentences long (25-40 words minimum)
 - Written in a personal, conversational, storytelling tone
-- Include exactly 3 relevant emojis at natural positions
+- Include exactly 3 relevant emojis
 - Share a personal experience related to listening to the song/music
 
-You NEVER write short or generic comments. You NEVER go off-topic from music/songs. Your comments always tell a mini-story about how a song made you feel or a moment tied to music."""
+Output Format:
+You MUST return a JSON Object with a single key "comments" which is a LIST of 5 objects.
+Each object in the list must have:
+- "comment": The text
+- "mood": The mood
+- "style": A short style descriptor
+
+Example JSON Structure:
+{
+  "comments": [
+    {"comment": "...", "mood": "...", "style": "..."},
+    {"comment": "...", "mood": "...", "style": "..."},
+    ...
+  ]
+}
+"""
 
 MOOD_PROMPTS = {
+    # ... (same as before) ...
     "romantic": "Write a romantic comment about how this song makes you feel in love.",
     "sad": "Write an emotional comment about how this song captures your sadness.",
     "energetic": "Write a high-energy comment about how this song pumps you up.",
@@ -78,15 +135,22 @@ MOOD_PROMPTS = {
 
 def generate_comment_gemini(mood, language, context=None):
     """
-    Generates a comment using Gemini API.
+    Generates a comment using Gemini API with Batching and Caching.
     """
-    global query_count
+    global query_count, COMMENT_CACHE
     
     if not client:
         print("Gemini API Client not initialized.")
         return None
 
+    # 1. Check Cache
+    cache_key = (mood, language, context)
+    if cache_key in COMMENT_CACHE and COMMENT_CACHE[cache_key]:
+        print("DEBUG: Serving comment from CACHE.")
+        return COMMENT_CACHE[cache_key].pop(0)
+
     try:
+        print("DEBUG: Cache miss. Fetching new batch from Gemini.")
         mood_instruction = MOOD_PROMPTS.get(mood.lower(), "Write an engaging comment.")
         
         lang_instruction = ""
@@ -99,47 +163,20 @@ def generate_comment_gemini(mood, language, context=None):
         if context:
             context_part = f"\nTopic: {context}"
 
-        # Build language-specific examples
-        if language.lower() == "bengali":
-            examples = """
-Example 1: "শুভ জন্মদিন! গান দিয়ে উদযাপন করার কী চমৎকার উপায়। আপনার আগামী বছরটিও সঙ্গীতময় হোক। 🎂🎉🎶"
-
-Example 2: "রান্না করতে করতে এই গানটা লুপে চালাচ্ছি। একটু একঘেয়ে কাজও কত আনন্দময় হয়ে যায়! সঙ্গ দেওয়ার জন্য ধন্যবাদ। 🍛🎧👩‍🍳"
-
-Example 3: "আজ মন খুব খারাপ ছিল, কিন্তু এই গানটা শুনে সব কিছু বদলে গেল। সত্যিই সঙ্গীত সেরা থেরাপি! 🌅💛🎵"
-"""
-        else:
-            examples = """
-Example 1: "I am playing this song on loop while cooking lunch. It makes the mundane work feel so enjoyable! Thank you for the company. 🍛🎧👩‍🍳"
-
-Example 2: "Just discovered this masterpiece during my late night study session. My notes are a mess but my soul feels so refreshed right now! 📚✨🎶"
-
-Example 3: "Woke up feeling low today but this completely turned my mood around. Sometimes music is the best therapy anyone could ask for! 🌅💛🎵"
-"""
-
         prompt = f"""{mood_instruction} {lang_instruction}{context_part}
 
-Here are examples of the EXACT style and length I want:
-{examples}
-Now, generate ONE comment in the exact same style and length as the examples above. Include 3 emojis.
-You MUST output the result in JSON format with the following keys:
-- "comment": The comment text itself.
-- "mood": The mood of the comment (e.g., Romantic, Sad, Energetic, etc. - use the requested mood if it fits, or refine it).
-- "style": A short style descriptor (e.g., Poetic, Casual, Short, Storytelling, Witty).
+Generate 5 distinct comments in the requested style.
+Ensure they are varied in tone and wording.
+Return ONLY the JSON object with the "comments" list.
+"""
 
-Output ONLY the JSON object. Do not wrap it in markdown block quotes."""
-
-        # Update config with system instruction for this call
-        # We need to create a new config object or pass system_instruction if supported directly
-        # The safest way in the new SDK is often passing config.
-        # Note: In google.genai, system_instruction is part of GenerateContentConfig
-        
         current_config = types.GenerateContentConfig(
             temperature=1.0,
             top_p=0.95,
             top_k=64,
-            max_output_tokens=500,
-            system_instruction=SYSTEM_INSTRUCTION
+            max_output_tokens=2000,
+            system_instruction=SYSTEM_INSTRUCTION,
+            response_mime_type="application/json" # Force JSON output
         )
 
         response = client.models.generate_content(
@@ -149,47 +186,43 @@ Output ONLY the JSON object. Do not wrap it in markdown block quotes."""
         )
         
         if response.text:
-            # Debug: Print raw response
-            print(f"DEBUG: Raw Gemini Response:\n{response.text}")
-            
-            result_text = response.text.strip()
-            
-            # More robust markdown cleanup
-            if result_text.startswith("```json"):
-                result_text = result_text[7:]
-            elif result_text.startswith("```"):
-                result_text = result_text[3:]
-            
-            if result_text.endswith("```"):
-                result_text = result_text[:-3]
-            
-            result_text = result_text.strip()
-            
             import json
             try:
-                result_json = json.loads(result_text)
+                result_json = json.loads(response.text)
                 
-                # Normalize keys to lowercase to ensure frontend compatibility
-                # (e.g. "Mood" -> "mood")
-                result_json = {k.lower(): v for k, v in result_json.items()}
+                comments_list = result_json.get("comments", [])
                 
-                # Increment usage counter
+                if not comments_list:
+                    print("DEBUG: No comments found in JSON response.")
+                    return None
+
+                # Process and normalize comments
+                processed_comments = []
+                for item in comments_list:
+                    # Normalize keys
+                    norm_item = {k.lower(): v for k, v in item.items()}
+                    processed_comments.append(norm_item)
+
+                # Increment usage (1 API call)
                 _reset_if_new_day()
                 query_count += 1
+                _save_usage() # Persist the new count
                 
-                return result_json
+                # 2. Store in Cache
+                # Return first one, cache the rest
+                first_comment = processed_comments.pop(0)
+                if processed_comments:
+                    COMMENT_CACHE[cache_key] = processed_comments
+                    print(f"DEBUG: Cached {len(processed_comments)} additional comments for this key.")
+                
+                return first_comment
+
             except json.JSONDecodeError as e:
                 print(f"JSON Decode Error: {e}")
-                print(f"Failed JSON text: {result_text}")
-                
-                # Fallback if AI returns plain text despite instructions
-                _reset_if_new_day()
-                query_count += 1
-                # Try to salvage comment if parsing failed
-                return {"comment": result_text, "mood": mood, "style": "General"}
-
+                print(f"Failed JSON text: {response.text}")
+                return None
         else:
-            print("Empty response (or no text) from Gemini")
+            print("Empty response from Gemini")
             return None
 
     except Exception as e:
