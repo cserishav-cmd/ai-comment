@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starmaker Comment Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="glass-card">
+            <div class="header">
+                <div class="icon-sparkle">✨</div>
+                <h1>Starmaker Comment Generator</h1>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="ai">AI Generator</button>
+                <button class="tab-btn" data-tab="search">Smart Search</button>
+                <button class="tab-btn" data-tab="browse">Browse</button>
+                <button class="tab-btn" data-tab="favorites">Favorites</button>
+            </div>
+
+            <!-- Tab 1: AI Generator (Gemini) -->
+            <div id="aiSection" class="tab-content active">
+                <div class="description">
+                    <p>Generate unique comments using AI.</p>
+                </div>
+
+                <!-- Language Toggle -->
+                <div class="language-toggle">
+                    <button class="lang-btn ai-lang active" data-lang="english">English</button>
+                    <button class="lang-btn ai-lang" data-lang="bengali">Bengali</button>
+                </div>
+
+                <!-- Mood Selector -->
+                <div class="section">
+                    <label>Select Mood</label>
+                    <select id="aiMoodSelect" class="mood-select">
+                        <option value="Admiring">Admiring(প্রশংসা)</option>
+                        <option value="Adventurous">Adventurous(দুঃসাহসিক)</option>
+                        <option value="Affectionate">Affectionate(স্নেহপূর্ণ)</option>
+                        <option value="Amazed">Amazed(বিস্মিত)</option>
+                        <option value="Analytical">Analytical(বিশ্লেষণাত্মক)</option>
+                        <option value="Anticipating">Anticipating(প্রত্যাশা)</option>
+                        <option value="Appreciative">Appreciative(প্রশংসা)</option>
+                        <option value="Artistic">Artistic(শিল্পকলা)</option>
+                        <option value="Atmospheric">Atmospheric(বায়ুমণ্ডলীয়)</option>
+                        <option value="Awe">Awe(বিস্ময়)</option>
+                        <option value="Blessing">Blessing(আশীর্বাদ)</option>
+                        <option value="Calm">Calm(শান্ত)</option>
+                        <option value="Caring">Caring</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Celebratory">Celebratory(উদযাপিত)</option>
+                        <option value="Cheerful">Cheerful(প্রফুল্ল)</option>
+                        <option value="Collaborative">Collaborative(সহযোগিতামূলক)</option>
+                        <option value="Comparative">Comparative(তুলনামূলক)</option>
+                        <option value="Compliment">Compliment(প্রশংসা)</option>
+                        <option value="Comforting">Comforting(আশ্বস্তকারী)</option>
+                        <option value="Constructive">Constructive(গঠনমূলক)</option>
+                        <option value="Cozy">Cozy(আরামদায়ক)</option>
+                        <option value="Critical">Critical(সমালোচনামূলক)</option>
+                        <option value="Cultural">Cultural(সাংস্কৃতিক)</option>
+                        <option value="Curious">Curious(কৌতূহলী)</option>
+                        <option value="Dedicated">Dedicated(নিবেদিত)</option>
+                        <option value="Deep">Deep(গভীর)</option>
+                        <option value="Devotional">Devotional(ভক্তিপূর্ণ)</option>
+                        <option value="Dreamy">Dreamy(স্বপ্নময়)</option>
+                        <option value="Emotional">Emotional(আবেগপূর্ণ)</option>
+                        <option value="Empowering">Empowering(ক্ষমতায়ন)</option>
+                        <option value="Encouraging">Encouraging(উৎসাহজনক)</option>
+                        <option value="Energetic">Energetic(শক্তিশালী)</option>
+                        <option value="Excited">Excited(উত্তেজিত)</option>
+                        <option value="Festive">Festive(উৎসবমুখর)</option>
+                        <option value="Festive/Sad">Festive(উৎসবমুখর)</option>
+                        <option value="Friendly">Friendly(বন্ধুত্বপূর্ণ)</option>
+                        <option value="Generous">Generous(উদার)</option>
+                        <option value="Grateful">Grateful(কৃতজ্ঞ)</option>
+                        <option value="Happy">Happy(সুখী)</option>
+                        <option value="Humble">Humble(বিনয়ী)</option>
+                        <option value="Impressed">Impressed(বিস্মিত)</option>
+                        <option value="Inspired">Inspired(অনুপ্রাণিত)</option>
+                        <option value="Loyal">Loyal(বিশ্বস্ত)</option>
+                        <option value="Melancholic">Melancholic(বিষণ্ণ)</option>
+                        <option value="Nostalgic">Nostalgic(স্মৃতিকাতর)</option>
+                        <option value="Observant">Observant(পর্যবেক্ষণকারী)</option>
+                        <option value="Passionate">Passionate(আবেগপূর্ণ)</option>
+                        <option value="Patient">Patient(ধৈর্যশীল)</option>
+                        <option value="Patriotic">Patriotic(দেশপ্রেমিক)</option>
+                        <option value="Pensive">Pensive(চিন্তাশীল)</option>
+                        <option value="Personal">Personal(ব্যক্তিগত)</option>
+                        <option value="Philosophical">Philosophical(দার্শনিক)</option>
+                        <option value="Playful">Playful(খেলোয়াড়)</option>
+                        <option value="Poetic">Poetic(কাব্যিক)</option>
+                        <option value="Positive">Positive(ইতিবাচক)</option>
+                        <option value="Proud">Proud(গর্বিত)</option>
+                        <option value="Pure">Pure(বিশুদ্ধ)</option>
+                        <option value="Relaxed">Relaxed(আরামদায়ক)</option>
+                        <option value="Relieved">Relieved(স্বস্তিদায়ক)</option>
+                        <option value="Request">Request(অনুরোধ)</option>
+                        <option value="Requesting">Requesting(অনুরোধকারী)</option>
+                        <option value="Respect">Respect(সম্মান)</option>
+                        <option value="Respectful">Respectful(সম্মানজনক)</option>
+                        <option value="Romantic">Romantic(রোমান্টিক)</option>
+                        <option value="Sad">Sad(দুঃখিত)</option>
+                        <option value="Serious">Serious(গুরুতর)</option>
+                        <option value="Sophisticated">Sophisticated(পরিশীলিত)</option>
+                        <option value="Special">Special(বিশেষ)</option>
+                        <option value="Spiritual">Spiritual(আধ্যাত্মিক)</option>
+                        <option value="Supportive">Supportive(সহায়ক)</option>
+                        <option value="Surprise">Surprise(আশ্চর্য)</option>
+                        <option value="Surprised">Surprised(আশ্চর্য)</option>
+                        <option value="Sweet">Sweet(মিষ্টি)</option>
+                        <option value="Technical">Technical(প্রযুক্তিগত)</option>
+                        <option value="Thoughtful">Thoughtful(চিন্তাশীল)</option>
+                        <option value="Warm">Warm(উষ্ণ)</option>
+                        <option value="Welcoming">Welcoming(স্বাগতম)</option>
+                        <option value="Wistful">Wistful(বিষণ্ণ)</option>
+                    </select>
+                </div>
+
+                <!-- Context Input -->
+                <div class="section">
+                    <label>Context (Optional)</label>
+                    <textarea id="aiContextInput" placeholder="e.g., A soulful melody that touches the heart..."
+                        rows="3"></textarea>
+                </div>
+
+                <button id="aiGenerateBtn" class="btn-primary">
+                    <span class="btn-text">Generate Comment</span>
+                    <span class="loader"></span>
+                </button>
+
+                <!-- Daily Usage Info -->
+                <div class="usage-info" id="usageBadge">
+                    <span class="usage-icon">⚡</span>
+                    <span class="usage-label">Daily AI Quota:</span>
+                    <span class="usage-text" id="usageText">500 / 500</span>
+                    <div class="usage-bar-mini">
+                        <div class="usage-bar-fill" id="usageBar" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Single Result Display -->
+                <div id="aiResultContainer" class="result-container hidden">
+                    <div class="result-box">
+                        <p id="aiCommentText" class="comment-text"></p>
+
+                        <!-- AI Tags -->
+                        <div id="aiTags" class="tags-container"></div>
+
+                        <div class="result-footer">
+                            <span class="source-tag">Generated by: <span id="sourceTag">AI</span></span>
+                            <div class="action-buttons" style="display: flex; gap: 0.5rem;">
+                                <button id="aiFavoriteBtn" class="icon-btn favorite-btn" title="Add to Favorites">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
+                                </button>
+                                <button id="aiCopyBtn" class="icon-btn" title="Copy to clipboard">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Smart Search (Local) -->
+            <div id="searchSection" class="tab-content hidden">
+                <div class="description">
+                    <p>Find existing comments by features & description.</p>
+                </div>
+
+                <!-- Language Toggle (Search) -->
+                <div class="language-toggle">
+                    <button class="lang-btn search-lang active" data-lang="english">English</button>
+                    <button class="lang-btn search-lang" data-lang="bengali">Bengali</button>
+                </div>
+
+                <!-- Mood Selector (Search) -->
+                <div class="section">
+                    <label>Select Mood</label>
+                    <select id="searchMoodSelect" class="mood-select">
+                        <option value="Admiring">Admiring(প্রশংসা)</option>
+                        <option value="Adventurous">Adventurous(দুঃসাহসিক)</option>
+                        <option value="Affectionate">Affectionate(স্নেহপূর্ণ)</option>
+                        <option value="Amazed">Amazed(বিস্মিত)</option>
+                        <option value="Analytical">Analytical(বিশ্লেষণাত্মক)</option>
+                        <option value="Anticipating">Anticipating(প্রত্যাশাপূর্ণ)</option>
+                        <option value="Appreciative">Appreciative(প্রশংসা)</option>
+                        <option value="Artistic">Artistic(শৈল্পিক)</option>
+                        <option value="Atmospheric">Atmospheric(বায়ুমণ্ডলীয়)</option>
+                        <option value="Awe">Awe(বিস্ময়)</option>
+                        <option value="Blessing">Blessing(আশীর্বাদ)</option>
+                        <option value="Calm">Calm(শান্ত)</option>
+                        <option value="Caring">Caring(যত্নশীল)</option>
+                        <option value="Casual">Casual(সাধারণ)</option>
+                        <option value="Celebratory">Celebratory(উদযাপনী)</option>
+                        <option value="Cheerful">Cheerful(প্রফুল্ল)</option>
+                        <option value="Collaborative">Collaborative(সহযোগিতামূলক)</option>
+                        <option value="Comparative">Comparative(তুলনামূলক)</option>
+                        <option value="Compliment">Compliment(প্রশংসা)</option>
+                        <option value="Comforting">Comforting(আরামদায়ক)</option>
+                        <option value="Constructive">Constructive(গঠনমূলক)</option>
+                        <option value="Cozy">Cozy(আরামদায়ক)</option>
+                        <option value="Critical">Critical(সমালোচনামূলক)</option>
+                        <option value="Cultural">Cultural(সাংস্কৃতিক)</option>
+                        <option value="Curious">Curious(কৌতূহলী)</option>
+                        <option value="Dedicated">Dedicated(নিবেদিত)</option>
+                        <option value="Deep">Deep(গভীর)</option>
+                        <option value="Devotional">Devotional(ভক্তিপূর্ণ)</option>
+                        <option value="Dreamy">Dreamy(স্বপ্নময়)</option>
+                        <option value="Emotional">Emotional(আবেগপূর্ণ)</option>
+                        <option value="Empowering">Empowering(ক্ষমতায়ন)</option>
+                        <option value="Encouraging">Encouraging(উৎসাহব্যঞ্জক)</option>
+                        <option value="Energetic">Energetic(শক্তিশালী)</option>
+                        <option value="Excited">Excited(উত্তেজিত)</option>
+                        <option value="Festive">Festive(উৎসবমুখর)</option>
+                        <option value="Festive/Sad">Festive/Sad(উৎসবমুখর/বিষণ্ণ)</option>
+                        <option value="Friendly">Friendly(বন্ধুত্বপূর্ণ)</option>
+                        <option value="Generous">Generous(উদার)</option>
+                        <option value="Grateful">Grateful(কৃতজ্ঞ)</option>
+                        <option value="Happy">Happy(সুখী)</option>
+                        <option value="Humble">Humble(বিনয়ী)</option>
+                        <option value="Impressed">Impressed(প্রভাবিত)</option>
+                        <option value="Inspired">Inspired(অনুপ্রাণিত)</option>
+                        <option value="Loyal">Loyal(বিশ্বস্ত)</option>
+                        <option value="Melancholic">Melancholic(বিষণ্ণ)</option>
+                        <option value="Nostalgic">Nostalgic(নস্টালজিক)</option>
+                        <option value="Observant">Observant(পর্যবেক্ষক)</option>
+                        <option value="Passionate">Passionate(আবেগপূর্ণ)</option>
+                        <option value="Patient">Patient(ধৈর্যশীল)</option>
+                        <option value="Patriotic">Patriotic(দেশপ্রেমিক)</option>
+                        <option value="Pensive">Pensive(চিন্তাশীল)</option>
+                        <option value="Personal">Personal(ব্যক্তিগত)</option>
+                        <option value="Philosophical">Philosophical(দার্শনিক)</option>
+                        <option value="Playful">Playful(খেলোয়াড়)</option>
+                        <option value="Poetic">Poetic(কাব্যিক)</option>
+                        <option value="Positive">Positive(ইতিবাচক)</option>
+                        <option value="Proud">Proud(গর্বিত)</option>
+                        <option value="Pure">Pure(বিশুদ্ধ)</option>
+                        <option value="Relaxed">Relaxed(আরামদায়ক)</option>
+                        <option value="Relieved">Relieved(স্বস্তিদায়ক)</option>
+                        <option value="Request">Request(অনুরোধ)</option>
+                        <option value="Requesting">Requesting(অনুরোধ)</option>
+                        <option value="Respect">Respect(সম্মান)</option>
+                        <option value="Respectful">Respectful(সম্মানজনক)</option>
+                        <option value="Romantic">Romantic(রোমান্টিক)</option>
+                        <option value="Sad">Sad(দুঃখিত)</option>
+                        <option value="Serious">Serious(গুরুতর)</option>
+                        <option value="Sophisticated">Sophisticated(পরিশীলিত)</option>
+                        <option value="Special">Special(বিশেষ)</option>
+                        <option value="Spiritual">Spiritual(আধ্যাত্মিক)</option>
+                        <option value="Supportive">Supportive(সহায়ক)</option>
+                        <option value="Surprise">Surprise(আশ্চর্য)</option>
+                        <option value="Surprised">Surprised(আশ্চর্য)</option>
+                        <option value="Sweet">Sweet(মিষ্টি)</option>
+                        <option value="Technical">Technical(প্রযুক্তিগত)</option>
+                        <option value="Thoughtful">Thoughtful(চিন্তাশীল)</option>
+                        <option value="Warm">Warm(উষ্ণ)</option>
+                        <option value="Welcoming">Welcoming(স্বাগতম)</option>
+                        <option value="Wistful">Wistful(বিষণ্ণ)</option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div class="section">
+                    <label>Description (Optional for detailed match)</label>
+                    <input type="text" id="promptInput" placeholder="e.g., 'Sunset', 'Motivation'..."
+                        autocomplete="off">
+                </div>
+
+                <!-- Search Button -->
+                <button id="searchBtn" class="btn-primary">
+                    <span class="btn-text">Find Comments</span>
+                    <span class="loader"></span>
+                </button>
+
+                <!-- Results List -->
+                <div id="resultsList" class="results-list hidden">
+                    <!-- Comments will be injected here -->
+                </div>
+            </div>
+
+            <!-- Tab 3: Browse (Explore by Filters) -->
+            <div id="browseSection" class="tab-content hidden">
+                <div class="description">
+                    <p>Browse all comments by language, mood & style.</p>
+                </div>
+
+                <!-- Language Toggle (Browse) -->
+                <div class="language-toggle">
+                    <button class="lang-btn browse-lang active" data-lang="english">English</button>
+                    <button class="lang-btn browse-lang" data-lang="bengali">Bengali</button>
+                </div>
+
+                <!-- Mood Selector (Browse) -->
+                <div class="section">
+                    <label>Mood</label>
+                    <select id="browseMoodSelect" class="mood-select">
+                        <option value="Romantic">Romantic</option>
+                    </select>
+                </div>
+
+                <!-- Style Selector (Browse) -->
+                <div class="section">
+                    <label>Style (Optional)</label>
+                    <select id="browseStyleSelect" class="mood-select">
+                        <option value="all">All Styles</option>
+                        <!-- Options will be populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Sort Selector -->
+                <div class="section">
+                    <label>Sort By</label>
+                    <select id="browseSortSelect" class="mood-select">
+                        <option value="random">Random</option>
+                        <option value="alphabetical">A-Z</option>
+                    </select>
+                </div>
+
+                <!-- Browse Button -->
+                <button id="browseBtn" class="btn-primary">
+                    <span class="btn-text">Browse Comments</span>
+                    <span class="loader"></span>
+                </button>
+
+                <!-- Pagination Info -->
+                <div id="paginationInfo" class="pagination-info hidden"></div>
+
+                <!-- Browse Results List -->
+                <div id="browseResultsList" class="results-list hidden">
+                    <!-- Comments will be injected here -->
+                </div>
+
+                <!-- Pagination Controls -->
+                <div id="paginationControls" class="pagination-controls hidden">
+                    <button id="prevPageBtn" class="page-btn">← Previous</button>
+                    <span id="pageIndicator" class="page-indicator"></span>
+                    <button id="nextPageBtn" class="page-btn">Next →</button>
+                </div>
+
+            </div>
+
+            <!-- Tab 4: Favorites -->
+            <div id="favoritesSection" class="tab-content hidden">
+                <div class="description">
+                    <p>Your saved comments collection.</p>
+                </div>
+
+                <div id="favoritesList" class="results-list">
+                    <!-- Favorites will be injected here -->
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="globalErrorMessage" class="error-message p-3 mt-4 hidden"></div>
+
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Starmaker Comment Generator.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}?v=3"></script>
+</body>
+
+</html>
