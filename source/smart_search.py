@@ -1,9 +1,6 @@
-import pandas as pd
-import numpy as np
 import random
-import faiss
-from sentence_transformers import SentenceTransformer
 import os
+import sys
 
 # Configuration
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,6 +12,30 @@ DF = None
 EMBEDDINGS = None
 MODEL = None
 INDEX = None
+
+# Lazy Loader for Heavy Dependencies
+pd = None
+np = None
+faiss = None
+SentenceTransformer = None
+
+def _import_heavy_deps():
+    global pd, np, faiss, SentenceTransformer
+    if pd is None:
+        try:
+            import pandas as pd_module
+            import numpy as np_module
+            import faiss as faiss_module
+            from sentence_transformers import SentenceTransformer as ST_module
+            
+            pd = pd_module
+            np = np_module
+            faiss = faiss_module
+            SentenceTransformer = ST_module
+            return True
+        except ImportError as e:
+            print(f"Smart Search dependency missing: {e}")
+            return False
 
 # Mood Keywords & Emoji Pools (From file.txt)
 MOOD_KEYWORDS = {
@@ -37,8 +58,12 @@ EMOJI_POOLS = {
 }
 
 def load_resources():
-    global DF, EMBEDDINGS, MODEL
+    global DF, EMBEDDINGS, MODEL, pd, np, SentenceTransformer
     
+    # Try to import heavy deps
+    if not _import_heavy_deps():
+        return
+
     if DF is None and os.path.exists(DATA_FILE):
         try:
             print("Loading dataset...")
@@ -85,8 +110,12 @@ def add_emojis(text, mood):
 def generate_from_prompt(user_prompt, mood=None, language=None, top_k=6):
     load_resources()
     
+    # Check if critical deps are loaded
+    if pd is None or np is None or faiss is None:
+        return [{"comment": "Smart Search unavailable (Missing Dependencies: pandas/numpy/faiss).", "mood": "Error", "style": "System"}]
+
     if DF is None or EMBEDDINGS is None:
-        return ["System initializing or data missing. Please try again."]
+        return [{"comment": "System initializing or data missing. Please try again.", "mood": "Error", "style": "System"}]
 
     # If prompt is empty but filters are provided, set a generic prompt to find *something* relevant
     if not user_prompt:
