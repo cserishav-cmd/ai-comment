@@ -1,4 +1,3 @@
-import pandas as pd
 import os
 import random
 
@@ -8,9 +7,19 @@ DATA_FILE = os.path.abspath(os.path.join(SCRIPT_DIR, '../dataset/comments.json')
 
 # Global Data Cache
 DF = None
+pd = None
 
 def load_data():
-    global DF
+    global DF, pd
+    # Lazy load pandas
+    if pd is None:
+        try:
+            import pandas as pd_module
+            pd = pd_module
+        except ImportError:
+            print("Browse Service: pandas not found. Browsing disabled.")
+            return
+
     if DF is None and os.path.exists(DATA_FILE):
         try:
             print("Loading dataset for browse...")
